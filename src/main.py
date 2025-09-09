@@ -2,6 +2,7 @@ import logging
 import os
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from .gemini_routes import router as gemini_router
 from .openai_routes import router as openai_router
 from .auth import get_credentials, get_user_project_id, onboard_user
@@ -109,29 +110,83 @@ async def handle_preflight(request: Request, full_path: str):
 @app.get("/")
 async def root():
     """
-    Root endpoint providing project information.
+    Root endpoint - behavior controlled by HIDE_ROOT_INFO environment variable.
     No authentication required.
     """
-    return {
-        "name": "geminicli2api",
-        "description": "OpenAI-compatible API proxy for Google's Gemini models via gemini-cli",
-        "purpose": "Provides both OpenAI-compatible endpoints (/v1/chat/completions) and native Gemini API endpoints for accessing Google's Gemini models",
-        "version": "1.0.0",
-        "endpoints": {
-            "openai_compatible": {
-                "chat_completions": "/v1/chat/completions",
-                "models": "/v1/models"
+    # Check environment variable to determine display mode
+    hide_info = os.getenv("HIDE_ROOT_INFO", "false").lower() == "true"
+    
+    if hide_info:
+        # Hidden mode: return simple welcome page
+        html_content = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Service</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-align: center;
+                }
+                .container {
+                    padding: 2rem;
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                }
+                h1 { 
+                    margin: 0 0 1rem 0; 
+                    font-size: 2.5rem; 
+                    font-weight: 300;
+                }
+                p { 
+                    margin: 0; 
+                    font-size: 1.2rem; 
+                    opacity: 0.9; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🤖 AI Service</h1>
+                <p>Service is running</p >
+            </div>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content, status_code=200)
+    else:
+        # Normal mode: return full API information
+        return {
+            "name": "geminicli2api",
+            "description": "OpenAI-compatible API proxy for Google's Gemini models via gemini-cli",
+            "purpose": "Provides both OpenAI-compatible endpoints (/v1/chat/completions) and native Gemini API endpoints for accessing Google's Gemini models",
+            "version": "1.0.0",
+            "endpoints": {
+                "openai_compatible": {
+                    "chat_completions": "/v1/chat/completions",
+                    "models": "/v1/models"
+                },
+                "native_gemini": {
+                    "models": "/v1beta/models",
+                    "generate": "/v1beta/models/{model}/generateContent",
+                    "stream": "/v1beta/models/{model}/streamGenerateContent"
+                },
+                "health": "/health"
             },
-            "native_gemini": {
-                "models": "/v1beta/models",
-                "generate": "/v1beta/models/{model}/generateContent",
-                "stream": "/v1beta/models/{model}/streamGenerateContent"
-            },
-            "health": "/health"
-        },
-        "authentication": "Required for all endpoints except root and health",
-        "repository": "https://github.com/user/geminicli2api"
-    }
+            "authentication": "Required for all endpoints except root and health",
+            "repository": "https://github.com/user/geminicli2api"
+        }
 
 # Health check endpoint for Docker/Hugging Face
 @app.get("/health")
