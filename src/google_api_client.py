@@ -315,7 +315,6 @@ def build_gemini_payload_from_native(native_request: dict, model_from_path: str)
     if "topK" in native_request["generationConfig"]:
         top_k = native_request["generationConfig"]["topK"]
         if top_k >= 65:
-            logging.warning(f"topK value {top_k} exceeds maximum of 64, adjusting to 64")
             native_request["generationConfig"]["topK"] = 64
         
     # native_request["enableEnhancedCivicAnswers"] = False
