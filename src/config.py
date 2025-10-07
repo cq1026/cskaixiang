@@ -119,6 +119,19 @@ BASE_MODELS = [
         "maxTemperature": 2.0,
         "topP": 0.95,
         "topK": 64
+    },
+    {
+        "name": "models/gemini-2.5-flash-image-preview",
+        "version": "001",
+        "displayName": "Gemini 2.5 Flash Image Preview",
+        "description": "Gemini 2.5 Flash Image Preview",
+        "inputTokenLimit": 32768,
+        "outputTokenLimit": 32768,
+        "supportedGenerationMethods": ["generateContent", "streamGenerateContent"],
+        "temperature": 1.0,
+        "maxTemperature": 2.0,
+        "topP": 0.95,
+        "topK": 64
     }
 ]
 
@@ -126,7 +139,8 @@ BASE_MODELS = [
 def _generate_search_variants():
     """Generate search variants for models that support content generation."""
     search_models = []
-    for model in BASE_MODELS:
+    base_model_with_variance = [model for model in BASE_MODELS if "gemini-2.5-flash-image" not in model["name"]]
+    for model in base_model_with_variance:
         # Only add search variants for models that support content generation
         if "generateContent" in model["supportedGenerationMethods"]:
             search_variant = model.copy()
@@ -140,7 +154,8 @@ def _generate_search_variants():
 def _generate_thinking_variants():
     """Generate nothinking and maxthinking variants for models that support thinking."""
     thinking_models = []
-    for model in BASE_MODELS:
+    base_model_with_variance = [model for model in BASE_MODELS if "gemini-2.5-flash-image" not in model["name"]]
+    for model in base_model_with_variance:
         # Only add thinking variants for models that support content generation
         # and contain "gemini-2.5-flash" or "gemini-2.5-pro" in their name
         if ("generateContent" in model["supportedGenerationMethods"] and
