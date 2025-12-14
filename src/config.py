@@ -184,9 +184,9 @@ def _generate_thinking_variants():
     base_model_with_variance = [model for model in BASE_MODELS if "gemini-2.5-flash-image" not in model["name"]]
     for model in base_model_with_variance:
         # Only add thinking variants for models that support content generation
-        # and contain "gemini-2.5-flash" or "gemini-2.5-pro" in their name
+        # and contain "gemini-2.5-flash", "gemini-2.5-pro", or "gemini-3-pro" in their name
         if ("generateContent" in model["supportedGenerationMethods"] and
-            ("gemini-2.5-flash" in model["name"] or "gemini-2.5-pro" in model["name"])):
+            ("gemini-2.5-flash" in model["name"] or "gemini-2.5-pro" in model["name"] or "gemini-3-pro" in model["name"])):
             
             # Add -nothinking variant
             nothinking_variant = model.copy()
