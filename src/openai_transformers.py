@@ -232,7 +232,7 @@ def openai_request_to_gemini(openai_request: OpenAIChatCompletionRequest) -> Dic
                     elif "gemini-2.5-pro" in base_model:
                         thinking_budget = 32768
                     elif "gemini-3-pro" in base_model:
-                        thinking_budget = 45000
+                        thinking_budget = 32768
             else:
                 # No reasoning_effort provided, use default thinking budget
                 thinking_budget = get_thinking_budget(openai_request.model)
